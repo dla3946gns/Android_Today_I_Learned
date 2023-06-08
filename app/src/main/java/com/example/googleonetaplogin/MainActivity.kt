@@ -20,6 +20,12 @@ import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.gson.GsonFactory
+import java.lang.Exception
+import java.util.Arrays
+import kotlin.concurrent.thread
 import kotlin.math.log
 
 
@@ -55,8 +61,8 @@ class MainActivity : AppCompatActivity() {
 
         tvLogin = findViewById(R.id.tv_login)
         tvLogin?.setOnClickListener {
-            //showGoogleOneTap()
-            showPopupWidnow()
+            showGoogleOneTap()
+            //showPopupWidnow()
         }
 
         tvSignup = findViewById(R.id.tv_signup)
@@ -160,9 +166,23 @@ class MainActivity : AppCompatActivity() {
                     val idToken = credential?.googleIdToken
                     val username = credential?.id
                     val password = credential?.password
+
+                    val verifier = GoogleIdTokenVerifier.Builder(NetHttpTransport(), GsonFactory())
+                        .setAudience(Arrays.asList("925104115708-dukd9jr5sssgo3r91gig4pbecork6uaa.apps.googleusercontent.com"))
+                        .build()
+
+                    thread(start = true) {
+                        try {
+                            val token = verifier.verify(idToken)
+                            val payload = token?.payload
+                        } catch (ex: Exception) {
+                            ex.stackTrace
+                        }
+                    }
+
                     when {
                         idToken != null -> {
-                            oneTapClient?.signOut()
+
                         }
                         password != null -> {
                             // Got a saved username and password. Use them to authenticate
